@@ -22,3 +22,25 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Output from Vite or CRA builds
+build/
+out/
+
+# Environment files
+.env
+.env.*    # vangt ook .env.local, .env.production, etc.
+
+# Optional: OS-specifieke
+Thumbs.db
+ehthumbs.db
+
+# MacOS
+*.DS_Store
+
+# Windows
+Desktop.ini
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
