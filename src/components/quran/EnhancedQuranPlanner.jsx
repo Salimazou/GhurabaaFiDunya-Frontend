@@ -16,6 +16,16 @@ import SurahGroup from './SurahGroup';
 import QuranAudioPlayer from './QuranAudioPlayer';
 import QuranSearch from './QuranSearch';
 
+// Define available reciters
+const RECITERS = [
+  { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy' },
+  { id: 'ar.saudalshuraim', name: 'Saud Al-Shuraim' },
+  { id: 'ar.abdullahawadaljuhani', name: 'Abdullah Juhany' },
+  { id: 'ar.aymanswed', name: 'Ayman Suwaid' },
+  { id: 'ar.yasseraldossari', name: 'Yasser al Dossari' },
+  { id: 'ar.jaberabdulhameed', name: 'Jaber Abdul Hameed' }
+];
+
 // Helper to group surahs by juz (30 equal parts)
 const groupByJuz = (surahs) => {
   // Create a proper Juz division based on the traditional Islamic division
@@ -52,11 +62,11 @@ const groupByJuz = (surahs) => {
 
 // Islamic pattern for visual decoration
 const IslamicPattern = () => (
-  <div className="absolute inset-0 pointer-events-none opacity-10">
+  <div className="absolute inset-0 pointer-events-none opacity-5">
     <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
       <pattern id="islamic-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
         <path d="M0 0h20v20H0zm20 20h20v20H20z" fill="currentColor" />
-        <path d="M0 20h20v20H0zm20-20h20v20H20z" fill="none" stroke="currentColor" strokeWidth="1" />
+        <path d="M0 20h20v20H0zm20-20h20v20H20z" fill="none" stroke="currentColor" strokeWidth="0.5" />
       </pattern>
       <rect width="100%" height="100%" fill="url(#islamic-pattern)" />
     </svg>
@@ -79,6 +89,7 @@ const EnhancedQuranPlanner = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [activeReciter, setActiveReciter] = useState('ar.alafasy');
   const [showFilters, setShowFilters] = useState(false);
+  const [showReciterSelect, setShowReciterSelect] = useState(false);
   
   // Load surahs from API when component mounts
   useEffect(() => {
@@ -267,6 +278,12 @@ const EnhancedQuranPlanner = () => {
     }
   };
   
+  // Handle reciter change
+  const handleReciterChange = (reciterId) => {
+    setActiveReciter(reciterId);
+    setShowReciterSelect(false);
+  };
+  
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-8 flex items-center justify-center relative overflow-hidden">
@@ -301,269 +318,257 @@ const EnhancedQuranPlanner = () => {
   
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden relative">
-      <div className="p-5 bg-gradient-to-r from-emerald-700 to-emerald-600 text-white relative overflow-hidden">
+      <div className="bg-emerald-100 text-emerald-700 p-4 relative overflow-hidden">
         <IslamicPattern />
-        <div className="flex items-center justify-between relative">
-          <div className="flex items-center">
-            <BookOpenIcon className="h-6 w-6 mr-2" />
-            <h2 className="text-xl font-bold">Koran Planner</h2>
-          </div>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold flex items-center">
+            <BookOpenIcon className="h-6 w-6 mr-2 text-emerald-600" />
+            Koran Planner
+          </h2>
           
-          <div className="flex space-x-1 sm:space-x-2">
+          <div className="flex space-x-2">
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="p-2 hover:bg-emerald-600 rounded-full text-white transition-colors"
-              aria-label="Filter Options"
-              title="Filter Options"
-            >
-              <AdjustmentsHorizontalIcon className="h-5 w-5" />
-            </button>
-            
-            <button
-              onClick={() => setShowSearch(!showSearch)}
-              className="p-2 hover:bg-emerald-600 rounded-full text-white transition-colors"
+              onClick={() => setShowSearch(true)}
+              className="p-1.5 rounded-full bg-white/80 text-emerald-700 hover:bg-white hover:text-emerald-600 transition shadow-sm"
               aria-label="Search Quran"
-              title="Search Quran"
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
             </button>
             
-            {startSurah && endSurah && (
-              <>
+            <button
+              onClick={() => setShowReciterSelect(!showReciterSelect)}
+              className="p-1.5 rounded-full bg-white/80 text-emerald-700 hover:bg-white hover:text-emerald-600 transition shadow-sm"
+              aria-label="Select reciter"
+            >
+              <SpeakerWaveIcon className="h-5 w-5" />
+            </button>
+            
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-1.5 rounded-full bg-white/80 text-emerald-700 hover:bg-white hover:text-emerald-600 transition shadow-sm"
+              aria-label="Filter surahs"
+            >
+              <AdjustmentsHorizontalIcon className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+        
+        <p className="text-emerald-600 mt-1 max-w-md">
+          Wat wil je vandaag lezen of onthouden uit de Koran? 🌙
+        </p>
+        
+        {showReciterSelect && (
+          <div className="mt-3 bg-white rounded-lg p-3 shadow-sm space-y-2">
+            <div className="text-sm font-medium text-slate-700 mb-2">Kies een recitator:</div>
+            <div className="grid grid-cols-2 gap-2">
+              {RECITERS.map(reciter => (
+                <button
+                  key={reciter.id}
+                  onClick={() => handleReciterChange(reciter.id)}
+                  className={`px-2 py-1.5 text-xs rounded-md transition-colors ${
+                    activeReciter === reciter.id 
+                      ? 'bg-emerald-100 text-emerald-700 font-medium' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {reciter.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {showFilters && (
+          <div className="mt-3 bg-white rounded-lg p-3 shadow-sm space-y-2">
+            <div className="text-sm font-medium text-slate-700 mb-2">Toon surahs:</div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedFilter('all')}
+                className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                  selectedFilter === 'all' 
+                    ? 'bg-emerald-100 text-emerald-700' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Alles
+              </button>
+              <button
+                onClick={() => setSelectedFilter('completed')}
+                className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                  selectedFilter === 'completed' 
+                    ? 'bg-emerald-100 text-emerald-700' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Voltooid
+              </button>
+              <button
+                onClick={() => setSelectedFilter('memorization')}
+                className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                  selectedFilter === 'memorization' 
+                    ? 'bg-emerald-100 text-emerald-700' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Memorisatie
+              </button>
+              <button
+                onClick={() => setSelectedFilter('inProgress')}
+                className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                  selectedFilter === 'inProgress' 
+                    ? 'bg-emerald-100 text-emerald-700' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                In Voortgang
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {startSurah && endSurah && (
+          <div className="mt-3 p-3 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
+            <div className="text-sm font-medium text-slate-700 mb-1">Huidige selectie:</div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-600">
+                {startSurah.number === endSurah.number
+                  ? `Surah ${startSurah.englishName}`
+                  : `Surah ${startSurah.englishName} tot ${endSurah.englishName}`}
+              </p>
+              <div className="flex space-x-2">
                 <button
                   onClick={markAsCompleted}
-                  className="p-2 sm:px-3 sm:py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-md text-sm font-medium transition-colors flex items-center"
-                  title="Mark as Completed"
+                  className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors flex items-center"
                 >
-                  <CheckIcon className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Markeer als Voltooid</span>
+                  <CheckIcon className="h-3 w-3 mr-1" />
+                  Voltooid
                 </button>
                 <button
                   onClick={resetSelections}
-                  className="p-2 sm:px-3 sm:py-1.5 bg-emerald-800 hover:bg-emerald-900 rounded-md text-sm font-medium transition-colors"
-                  title="Reset Selection"
+                  className="px-2 py-1 text-xs bg-slate-100 text-slate-600 rounded hover:bg-slate-200 transition-colors flex items-center"
                 >
-                  <XMarkIcon className="h-4 w-4 sm:mr-1" />
-                  <span className="hidden sm:inline">Reset</span>
+                  <XMarkIcon className="h-3 w-3 mr-1" />
+                  Reset
                 </button>
-              </>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="p-0">
+        {loading ? (
+          <div className="p-8 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-300 border-t-emerald-600"></div>
+            <span className="ml-3 text-slate-600">Laden...</span>
+          </div>
+        ) : error ? (
+          <div className="p-6 text-center">
+            <div className="inline-flex items-center px-4 py-2 rounded-md bg-amber-50 text-amber-700 mb-4">
+              <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Kon Koran-data niet laden. Probeer opnieuw.
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-md hover:bg-emerald-200 transition-colors"
+            >
+              <ArrowPathIcon className="h-4 w-4 mr-1 inline" />
+              Probeer opnieuw
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4 p-2 md:p-4 max-h-96 overflow-y-auto">
+            {getFilteredJuzs().map((juz) => (
+              <div key={juz.juzNumber} className="border border-slate-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <button
+                  onClick={() => toggleJuz(juz.juzNumber)}
+                  className="w-full px-4 py-3 flex justify-between items-center bg-slate-50 text-left"
+                >
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium mr-2">
+                      {juz.juzNumber}
+                    </span>
+                    <span className="font-medium text-slate-700">Juz {juz.juzNumber}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-slate-500">{juz.surahs.length} surahs</span>
+                    <span className="text-xs bg-slate-200 rounded-full h-5 w-5 flex items-center justify-center">
+                      {expandedJuz === juz.juzNumber ? '−' : '+'}
+                    </span>
+                  </div>
+                </button>
+                
+                {expandedJuz === juz.juzNumber && (
+                  <div className="p-3 bg-white">
+                    <SurahGroup 
+                      surahs={juz.surahs}
+                      completedSurahs={completedSurahs}
+                      markedForMemorization={markedForMemorization}
+                      startSurah={startSurah}
+                      endSurah={endSurah}
+                      onSelectStartSurah={handleSelectStartSurah}
+                      onSelectEndSurah={handleSelectEndSurah}
+                      onToggleMemorization={toggleMemorization}
+                      onPlayAudio={handlePlayAudio}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {getFilteredJuzs().length === 0 && (
+              <p className="text-center p-6 text-slate-500">
+                Geen surahs gevonden voor de geselecteerde filter.
+              </p>
             )}
           </div>
-        </div>
-        
-        {startSurah && endSurah ? (
-          <div className="mt-3 text-emerald-50">
-            <p>Vandaag lezen: <span className="font-semibold">
-              {startSurah.number === endSurah.number 
-                ? `Surah ${startSurah.number}: ${startSurah.englishName} (${startSurah.name})` 
-                : `Surah ${startSurah.number}-${endSurah.number}: ${startSurah.englishName} (${startSurah.name}) tot ${endSurah.englishName} (${endSurah.name})`}
-            </span></p>
-          </div>
-        ) : (
-          <p className="mt-3 text-emerald-100 text-sm">
-            Selecteer de surahs die je vandaag wilt lezen of memoriseren.
-          </p>
-        )}
-        
-        {/* Filter dropdown */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute right-0 top-full mt-2 mr-5 bg-white rounded-lg shadow-lg z-20 overflow-hidden"
-            >
-              <div className="py-2 px-1 w-64">
-                <div className="px-3 py-2 border-b border-gray-100">
-                  <h3 className="font-medium text-gray-700">Filter Surahs</h3>
-                </div>
-                
-                <div className="flex flex-col space-y-1 p-2">
-                  <button 
-                    className={`px-3 py-2 text-left rounded text-sm ${selectedFilter === 'all' ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-gray-100'}`}
-                    onClick={() => setSelectedFilter('all')}
-                  >
-                    All Surahs
-                  </button>
-                  <button 
-                    className={`px-3 py-2 text-left rounded text-sm ${selectedFilter === 'completed' ? 'bg-emerald-100 text-emerald-800' : 'hover:bg-gray-100'}`}
-                    onClick={() => setSelectedFilter('completed')}
-                  >
-                    Completed Surahs
-                  </button>
-                  <button 
-                    className={`px-3 py-2 text-left rounded text-sm ${selectedFilter === 'memorization' ? 'bg-amber-100 text-amber-800' : 'hover:bg-gray-100'}`}
-                    onClick={() => setSelectedFilter('memorization')}
-                  >
-                    Memorization Surahs
-                  </button>
-                  <button 
-                    className={`px-3 py-2 text-left rounded text-sm ${selectedFilter === 'inProgress' ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
-                    onClick={() => setSelectedFilter('inProgress')}
-                  >
-                    In Progress
-                  </button>
-                </div>
-                
-                <div className="mt-2 px-3 py-2 border-t border-gray-100">
-                  <h3 className="font-medium text-gray-700 mb-2">Reciter</h3>
-                  <select 
-                    value={activeReciter}
-                    onChange={(e) => setActiveReciter(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded text-sm"
-                  >
-                    <option value="ar.alafasy">Mishary Rashid Alafasy</option>
-                    <option value="ar.abdulbasitmurattal">Abdul Basit Murattal</option>
-                    <option value="ar.abdullahbasfar">Abdullah Basfar</option>
-                    <option value="ar.abdurrahmaansudais">Abdurrahmaan As-Sudais</option>
-                    <option value="ar.minshawi">Minshawi</option>
-                    <option value="ar.muhammadayyoub">Muhammad Ayyoub</option>
-                  </select>
-                </div>
-                
-                <div className="border-t border-gray-100 pt-3 px-3">
-                  <button
-                    onClick={handleResetAll}
-                    className="text-red-600 text-sm hover:underline flex items-center"
-                  >
-                    <ArrowPathIcon className="h-3 w-3 mr-1" />
-                    Reset All Progress
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-        
-        {/* Quran Search Modal */}
-        <AnimatePresence>
-          {showSearch && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            >
-              <div className="bg-white rounded-lg shadow-xl overflow-hidden max-w-lg w-full">
-                <div className="flex justify-end p-2">
-                  <button
-                    onClick={() => setShowSearch(false)}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <XMarkIcon className="h-6 w-6" />
-                  </button>
-                </div>
-                <QuranSearch 
-                  onSelectResult={handleSearchResult}
-                  onClose={() => setShowSearch(false)}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      
-      <div className="max-h-[60vh] overflow-y-auto p-1 bg-gray-50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        {filteredJuzs.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            No surahs found matching the selected filter.
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {filteredJuzs.map(juz => (
-              <SurahGroup
-                key={juz.juzNumber}
-                title={`Juz ${juz.juzNumber}`}
-                surahs={juz.surahs}
-                startSurah={startSurah}
-                endSurah={endSurah}
-                completedSurahs={completedSurahs}
-                memorizationSurahs={markedForMemorization}
-                onSelectStart={handleSelectStartSurah}
-                onSelectEnd={handleSelectEndSurah}
-                onToggleMemorize={toggleMemorization}
-                onPlayAudio={handlePlayAudio}
-                isExpanded={expandedJuz === juz.juzNumber}
-                onToggleExpand={() => toggleJuz(juz.juzNumber)}
-              />
-            ))}
-          </div>
         )}
       </div>
       
-      {/* Stats section */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
-        <div className="flex flex-col sm:flex-row justify-between text-sm">
-          <div className="mb-2 sm:mb-0">
-            <span className="text-gray-500">Voltooid: </span>
-            <span className="font-medium text-emerald-700">{completedSurahs.length} surahs</span>
-            <span className="text-gray-400 mx-2">|</span>
-            <span className="text-gray-500">Voor memorisatie: </span>
-            <span className="font-medium text-amber-500">{markedForMemorization.length} surahs</span>
-          </div>
-          <div className="text-gray-500">
-            <span>Geselecteerd: </span>
-            <span className="font-medium">
-              {startSurah && endSurah ? 
-                (startSurah.number === endSurah.number ? 
-                  '1 surah' : 
-                  `${endSurah.number - startSurah.number + 1} surahs`) : 
-                '0 surahs'}
-            </span>
-          </div>
-        </div>
-      </div>
+      <AnimatePresence>
+        {showSearch && (
+          <QuranSearch 
+            onClose={() => setShowSearch(false)} 
+            onSelectSurah={handleSearchResult}
+          />
+        )}
+      </AnimatePresence>
       
-      {/* Completion Modal */}
       <AnimatePresence>
         {showCompletionModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg p-6 w-full max-w-md"
+              className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl"
             >
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Heb je alle geselecteerde surahs voltooid?
-              </h3>
-              
-              <p className="text-gray-600 mb-6">
-                {startSurah && endSurah ? (
-                  startSurah.number === endSurah.number ? (
-                    <>Je hebt geselecteerd: <span className="font-medium">Surah {startSurah.number}: {startSurah.englishName}</span></>
-                  ) : (
-                    <>Je hebt geselecteerd: <span className="font-medium">Surah {startSurah.number}-{endSurah.number}: van {startSurah.englishName} tot {endSurah.englishName}</span></>
-                  )
-                ) : (
-                  "Geen selectie gemaakt"
-                )}
+              <h3 className="text-lg font-bold text-slate-800 mb-4">Markeer als voltooid</h3>
+              <p className="text-slate-600 mb-6">
+                {startSurah && endSurah && startSurah.number === endSurah.number
+                  ? `Heb je Surah ${startSurah.englishName} voltooid?`
+                  : `Wil je alle surahs van ${startSurah?.englishName} tot ${endSurah?.englishName} markeren als voltooid?`}
               </p>
               
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                <button
-                  onClick={() => handleCompletionConfirm(true)}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded transition-colors"
-                >
-                  Ja, alles voltooid
-                </button>
-                <button
-                  onClick={() => handleCompletionConfirm(false)}
-                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded transition-colors"
-                >
-                  Nee, gedeeltelijk
-                </button>
+              <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setShowCompletionModal(false)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition-colors"
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
                 >
                   Annuleren
+                </button>
+                <button
+                  onClick={() => handleCompletionConfirm(true)}
+                  className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-md hover:bg-emerald-200 transition-colors"
+                >
+                  Bevestigen
                 </button>
               </div>
             </motion.div>
@@ -571,16 +576,13 @@ const EnhancedQuranPlanner = () => {
         )}
       </AnimatePresence>
       
-      {/* Audio Player */}
-      <AnimatePresence>
-        {audioSurah && (
-          <QuranAudioPlayer
-            surah={audioSurah}
-            onClose={() => setAudioSurah(null)}
-            audioIdentifier={activeReciter}
-          />
-        )}
-      </AnimatePresence>
+      {audioSurah && (
+        <QuranAudioPlayer 
+          surah={audioSurah} 
+          onClose={() => setAudioSurah(null)}
+          audioIdentifier={activeReciter}
+        />
+      )}
     </div>
   );
 };

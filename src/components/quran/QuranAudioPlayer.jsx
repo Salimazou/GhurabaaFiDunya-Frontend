@@ -15,7 +15,11 @@ import quranAPI from '../../services/quranAPI';
 // Define available reciters
 const RECITERS = [
   { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy' },
-  { id: 'ar.saudalshuraim', name: 'Saud Al-Shuraim' }
+  { id: 'ar.saudalshuraim', name: 'Saud Al-Shuraim' },
+  { id: 'ar.abdullahawadaljuhani', name: 'Abdullah Juhany' },
+  { id: 'ar.aymanswed', name: 'Ayman Suwaid' },
+  { id: 'ar.yasseraldossari', name: 'Yasser al Dossari' },
+  { id: 'ar.jaberabdulhameed', name: 'Jaber Abdul Hameed' }
 ];
 
 const QuranAudioPlayer = ({ 

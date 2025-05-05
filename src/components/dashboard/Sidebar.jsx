@@ -12,10 +12,11 @@ import {
   BookOpenIcon
 } from '@heroicons/react/24/outline';
 
-// Islamic arabesque pattern for sidebar header
+// Islamic arabesque pattern for sidebar header with softer colors
 const arabesquePattern = {
-  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'44\' height=\'12\' viewBox=\'0 0 44 12\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M20 12v-2L0 0v10l4 2h16zm18 0l4-2V0L22 10v2h16zM20 0v8L4 0h16zm18 0L22 8V0h16z\' fill=\'%23FFFFFF\' fill-opacity=\'0.15\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
-  backgroundSize: '30px auto'
+  backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'44\' height=\'12\' viewBox=\'0 0 44 12\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M20 12v-2L0 0v10l4 2h16zm18 0l4-2V0L22 10v2h16zM20 0v8L4 0h16zm18 0L22 8V0h16z\' fill=\'%23FFFFFF\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+  backgroundSize: '30px auto',
+  background: 'linear-gradient(to bottom, #047857, #10b981)' // Gradient from emerald-700 to emerald-500
 };
 
 export default function Sidebar({ user, onLogout, onNavigate }) {
@@ -81,7 +82,7 @@ export default function Sidebar({ user, onLogout, onNavigate }) {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleSidebar}
-          className="p-2 rounded-md bg-emerald-600 text-white shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+          className="p-2 rounded-md bg-emerald-600 text-white shadow-md hover:bg-emerald-700 hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
           aria-label={sidebarOpen ? "Close menu" : "Open menu"}
           aria-expanded={sidebarOpen}
           aria-controls="mobile-sidebar"
@@ -91,20 +92,39 @@ export default function Sidebar({ user, onLogout, onNavigate }) {
       </div>
 
       {/* Bottom mobile navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-30">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-slate-200 z-30">
         <div className="flex justify-around">
           {navigationItems.slice(0, 5).map((item) => (
-            <button
+            <motion.button
               key={item.name}
               onClick={() => handleNavItemClick(item.name)}
-              className={`flex flex-col items-center py-2 px-1 flex-1 transition-colors ${
-                item.active ? 'text-emerald-600' : 'text-gray-600'
+              className={`flex flex-col items-center py-2 px-1 flex-1 transition-all ${
+                item.active 
+                  ? 'text-emerald-700 bg-emerald-100 rounded-t-xl' 
+                  : 'text-slate-600 hover:text-emerald-600'
               }`}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ y: -2 }}
               aria-label={item.name}
             >
-              <item.icon className="h-6 w-6" />
+              <motion.div 
+                className="relative"
+                initial={false}
+                animate={item.active ? { scale: 1.1 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <item.icon className={`h-6 w-6 ${item.active ? 'text-emerald-600' : ''}`} />
+                {item.active && (
+                  <motion.div 
+                    className="absolute -bottom-1 left-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full"
+                    initial={{ opacity: 0, x: "-50%" }}
+                    animate={{ opacity: 1, x: "-50%" }}
+                    layoutId="bottomNavIndicator"
+                  />
+                )}
+              </motion.div>
               <span className="text-xs mt-1">{item.name}</span>
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -139,7 +159,7 @@ export default function Sidebar({ user, onLogout, onNavigate }) {
         {/* Close button for mobile - positioned at the top right */}
         <button
           onClick={closeSidebar}
-          className="absolute top-4 right-4 p-1 rounded-full bg-emerald-600 text-white md:hidden focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute top-4 right-4 p-1 rounded-full bg-white/20 text-white md:hidden hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
           aria-label="Close sidebar"
         >
           <XMarkIcon className="h-5 w-5" />
@@ -163,15 +183,15 @@ export default function Sidebar({ user, onLogout, onNavigate }) {
               <li key={item.name}>
                 <button
                   onClick={() => handleNavItemClick(item.name)}
-                  className={`flex w-full items-center p-2 md:p-3 rounded-lg text-sm font-medium transition-colors
+                  className={`flex w-full items-center p-2 md:p-3 rounded-lg text-sm font-medium transition-all hover:scale-105
                     ${
                       item.active
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 active:bg-emerald-100'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 active:bg-emerald-100'
                     }`}
                   aria-current={item.active ? 'page' : undefined}
                 >
-                  <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                  <item.icon className={`h-5 w-5 mr-3 flex-shrink-0 ${item.active ? 'text-emerald-600' : ''}`} />
                   {item.name}
                 </button>
               </li>
