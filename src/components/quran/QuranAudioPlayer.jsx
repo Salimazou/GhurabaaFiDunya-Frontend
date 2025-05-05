@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PlayIcon, 
   PauseIcon, 
   ForwardIcon, 
   BackwardIcon, 
   XMarkIcon,
-  SpeakerWaveIcon
+  SpeakerWaveIcon,
+  MinusIcon,
+  ArrowsPointingOutIcon
 } from '@heroicons/react/24/solid';
 import quranAPI from '../../services/quranAPI';
 
@@ -29,6 +31,7 @@ const QuranAudioPlayer = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedReciter, setSelectedReciter] = useState(audioIdentifier);
+  const [isMinimized, setIsMinimized] = useState(false);
   
   const audioRef = useRef(null);
   
@@ -157,6 +160,11 @@ const QuranAudioPlayer = ({
     setCurrentTime(0);
   };
   
+  // Toggle minimized state
+  const toggleMinimized = () => {
+    setIsMinimized(!isMinimized);
+  };
+  
   if (!surah) return null;
   
   return (
@@ -166,115 +174,193 @@ const QuranAudioPlayer = ({
       exit={{ opacity: 0, y: 20 }}
       className="fixed bottom-0 inset-x-0 p-4 z-50"
     >
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-4 border border-gray-200">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex-1 mr-4">
-            <h3 className="font-medium text-gray-800">{surah.englishName}</h3>
-            <p className="text-sm text-gray-500">{surah.englishNameTranslation}</p>
-          </div>
-          
-          <button
-            onClick={onClose}
-            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-            aria-label="Close audio player"
+      <AnimatePresence mode="wait">
+        {isMinimized ? (
+          // Minimized player
+          <motion.div 
+            key="mini-player"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="max-w-sm mx-auto bg-white rounded-lg shadow-lg p-3 border border-gray-200 flex items-center justify-between"
           >
-            <XMarkIcon className="h-5 w-5" />
-          </button>
-        </div>
-        
-        {/* Reciter selection */}
-        <div className="mb-3 flex items-center justify-center">
-          <SpeakerWaveIcon className="h-4 w-4 text-gray-500 mr-2" />
-          <select 
-            value={selectedReciter}
-            onChange={handleReciterChange}
-            className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded px-2 py-1 focus:ring-emerald-500 focus:border-emerald-500"
-            disabled={loading}
+            <div className="flex items-center">
+              <button
+                onClick={togglePlay}
+                className={`p-2 rounded-full mr-3 ${
+                  isPlaying ? 'bg-red-500' : 'bg-emerald-500'
+                } text-white`}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+              >
+                {loading ? (
+                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                ) : isPlaying ? (
+                  <PauseIcon className="h-4 w-4" />
+                ) : (
+                  <PlayIcon className="h-4 w-4" />
+                )}
+              </button>
+              <div>
+                <p className="font-medium text-sm truncate max-w-[120px]">{surah.englishName}</p>
+                <div className="flex items-center">
+                  <div 
+                    className="w-20 h-1 bg-gray-200 rounded-full mr-2 relative overflow-hidden"
+                  >
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full"
+                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={toggleMinimized}
+                className="p-1.5 text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label="Expand player"
+              >
+                <ArrowsPointingOutIcon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-1.5 text-gray-500 hover:text-red-500 transition-colors"
+                aria-label="Close audio player"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          // Full player
+          <motion.div 
+            key="full-player"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-4 border border-gray-200"
           >
-            {RECITERS.map(reciter => (
-              <option key={reciter.id} value={reciter.id}>
-                {reciter.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        {/* Progress bar */}
-        <div 
-          className="h-2 bg-gray-200 rounded-full mb-3 relative cursor-pointer overflow-hidden"
-          onClick={handleProgressClick}
-        >
-          <div 
-            className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full"
-            style={{ width: `${(currentTime / duration) * 100}%` }}
-          ></div>
-        </div>
-        
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
-          <span className="text-xs text-gray-500">{formatTime(duration)}</span>
-        </div>
-        
-        {/* Controls */}
-        <div className="flex items-center justify-center space-x-4">
-          <button
-            onClick={() => jumpTime(-10)}
-            className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-            aria-label="Jump 10 seconds back"
-          >
-            <BackwardIcon className="h-5 w-5" />
-          </button>
-          
-          <button
-            onClick={togglePlay}
-            disabled={loading || error}
-            className={`p-3 rounded-full transition-colors ${
-              loading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-500 text-white hover:bg-emerald-600'
-            }`}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {loading ? (
-              <div className="h-5 w-5 rounded-full border-2 border-gray-300 border-t-gray-500 animate-spin"></div>
-            ) : isPlaying ? (
-              <PauseIcon className="h-5 w-5" />
-            ) : (
-              <PlayIcon className="h-5 w-5" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1 mr-4">
+                <h3 className="font-medium text-gray-800">{surah.englishName}</h3>
+                <p className="text-sm text-gray-500">{surah.englishNameTranslation}</p>
+              </div>
+              
+              <div className="flex items-center">
+                <button
+                  onClick={toggleMinimized}
+                  className="p-1 mr-1 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Minimize audio player"
+                >
+                  <MinusIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={onClose}
+                  className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  aria-label="Close audio player"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Reciter selection */}
+            <div className="mb-3 flex items-center justify-center">
+              <SpeakerWaveIcon className="h-4 w-4 text-gray-500 mr-2" />
+              <select 
+                value={selectedReciter}
+                onChange={handleReciterChange}
+                className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded px-2 py-1 focus:ring-emerald-500 focus:border-emerald-500"
+                disabled={loading}
+              >
+                {RECITERS.map(reciter => (
+                  <option key={reciter.id} value={reciter.id}>
+                    {reciter.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Progress bar */}
+            <div 
+              className="h-2 bg-gray-200 rounded-full mb-3 relative cursor-pointer overflow-hidden"
+              onClick={handleProgressClick}
+            >
+              <div 
+                className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full"
+                style={{ width: `${(currentTime / duration) * 100}%` }}
+              ></div>
+            </div>
+            
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
+              <span className="text-xs text-gray-500">{formatTime(duration)}</span>
+            </div>
+            
+            {/* Controls */}
+            <div className="flex items-center justify-center space-x-4">
+              <button
+                onClick={() => jumpTime(-10)}
+                className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                aria-label="Jump 10 seconds back"
+              >
+                <BackwardIcon className="h-5 w-5" />
+              </button>
+              
+              <button
+                onClick={togglePlay}
+                disabled={loading || error}
+                className={`p-3 rounded-full transition-colors ${
+                  loading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                }`}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+              >
+                {loading ? (
+                  <div className="h-5 w-5 rounded-full border-2 border-gray-300 border-t-gray-500 animate-spin"></div>
+                ) : isPlaying ? (
+                  <PauseIcon className="h-5 w-5" />
+                ) : (
+                  <PlayIcon className="h-5 w-5" />
+                )}
+              </button>
+              
+              <button
+                onClick={() => jumpTime(10)}
+                className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                aria-label="Jump 10 seconds forward"
+              >
+                <ForwardIcon className="h-5 w-5" />
+              </button>
+            </div>
+            
+            {/* Volume control */}
+            <div className="flex items-center justify-center mt-3">
+              <span className="text-xs text-gray-500 mr-2">Volume</span>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(parseFloat(e.target.value))}
+                className="w-32 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+            
+            {/* Error message */}
+            {error && (
+              <div className="mt-3 text-sm text-red-500 text-center">
+                {error}. Please try again or try a different audio source.
+              </div>
             )}
-          </button>
-          
-          <button
-            onClick={() => jumpTime(10)}
-            className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-            aria-label="Jump 10 seconds forward"
-          >
-            <ForwardIcon className="h-5 w-5" />
-          </button>
-        </div>
-        
-        {/* Volume control */}
-        <div className="flex items-center justify-center mt-3">
-          <span className="text-xs text-gray-500 mr-2">Volume</span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="w-32 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
-        
-        {/* Hidden audio element */}
-        <audio ref={audioRef} preload="auto" className="hidden" />
-        
-        {/* Error message */}
-        {error && (
-          <div className="mt-3 text-sm text-red-500 text-center">
-            {error}. Please try again or try a different audio source.
-          </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+      
+      {/* Hidden audio element */}
+      <audio ref={audioRef} preload="auto" className="hidden" />
     </motion.div>
   );
 };

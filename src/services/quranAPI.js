@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URLs for Quran API
-const QURAN_API_BASE = 'http://api.alquran.cloud/v1';
+const QURAN_API_BASE = 'https://api.alquran.cloud/v1';
 const QURAN_AUDIO_BASE = 'https://cdn.islamic.network/quran/audio-surah';
 
 // Create axios instance for Quran API
