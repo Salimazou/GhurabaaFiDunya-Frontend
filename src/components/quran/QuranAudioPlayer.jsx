@@ -1,0 +1,282 @@
+import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  PlayIcon, 
+  PauseIcon, 
+  ForwardIcon, 
+  BackwardIcon, 
+  XMarkIcon,
+  SpeakerWaveIcon
+} from '@heroicons/react/24/solid';
+import quranAPI from '../../services/quranAPI';
+
+// Define available reciters
+const RECITERS = [
+  { id: 'ar.alafasy', name: 'Mishary Rashid Alafasy' },
+  { id: 'ar.saudalshuraim', name: 'Saud Al-Shuraim' }
+];
+
+const QuranAudioPlayer = ({ 
+  surah,
+  onClose,
+  audioIdentifier = 'ar.alafasy',
+  bitrate = '128'
+}) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedReciter, setSelectedReciter] = useState(audioIdentifier);
+  
+  const audioRef = useRef(null);
+  
+  // Initialize audio when surah or reciter changes
+  useEffect(() => {
+    if (surah) {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const audioUrl = quranAPI.getAudioUrl(surah.number, selectedReciter, bitrate);
+        
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          audioRef.current.load();
+        }
+      } catch (err) {
+        console.error('Error loading audio:', err);
+        setError('Could not load audio');
+        setLoading(false);
+      }
+    }
+  }, [surah, selectedReciter, bitrate]);
+  
+  // Set up audio event listeners
+  useEffect(() => {
+    const audio = audioRef.current;
+    
+    if (!audio) return;
+    
+    const handleTimeUpdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+    
+    const handleDurationChange = () => {
+      setDuration(audio.duration);
+      setLoading(false);
+    };
+    
+    const handleLoadedData = () => {
+      setDuration(audio.duration);
+      setLoading(false);
+    };
+    
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+    
+    const handleError = (e) => {
+      console.error('Audio error:', e);
+      setError('Error playing audio');
+      setLoading(false);
+      setIsPlaying(false);
+    };
+    
+    // Add event listeners
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+    
+    return () => {
+      // Remove event listeners
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('loadeddata', handleLoadedData);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
+  
+  // Update volume when it changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+  
+  // Toggle play/pause
+  const togglePlay = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+  
+  // Format time (seconds) to mm:ss
+  const formatTime = (time) => {
+    if (!time || isNaN(time)) return '00:00';
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+  
+  // Handle progress bar click
+  const handleProgressClick = (e) => {
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    
+    if (audioRef.current && duration) {
+      const newTime = pos * duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+  
+  // Jump forward/backward
+  const jumpTime = (seconds) => {
+    if (audioRef.current) {
+      const newTime = Math.max(0, Math.min(audioRef.current.duration, audioRef.current.currentTime + seconds));
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
+  
+  // Add handleReciterChange function
+  const handleReciterChange = (e) => {
+    const newReciter = e.target.value;
+    setSelectedReciter(newReciter);
+    setIsPlaying(false);
+    setCurrentTime(0);
+  };
+  
+  if (!surah) return null;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="fixed bottom-0 inset-x-0 p-4 z-50"
+    >
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex-1 mr-4">
+            <h3 className="font-medium text-gray-800">{surah.englishName}</h3>
+            <p className="text-sm text-gray-500">{surah.englishNameTranslation}</p>
+          </div>
+          
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+            aria-label="Close audio player"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+        
+        {/* Reciter selection */}
+        <div className="mb-3 flex items-center justify-center">
+          <SpeakerWaveIcon className="h-4 w-4 text-gray-500 mr-2" />
+          <select 
+            value={selectedReciter}
+            onChange={handleReciterChange}
+            className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded px-2 py-1 focus:ring-emerald-500 focus:border-emerald-500"
+            disabled={loading}
+          >
+            {RECITERS.map(reciter => (
+              <option key={reciter.id} value={reciter.id}>
+                {reciter.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Progress bar */}
+        <div 
+          className="h-2 bg-gray-200 rounded-full mb-3 relative cursor-pointer overflow-hidden"
+          onClick={handleProgressClick}
+        >
+          <div 
+            className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full"
+            style={{ width: `${(currentTime / duration) * 100}%` }}
+          ></div>
+        </div>
+        
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
+          <span className="text-xs text-gray-500">{formatTime(duration)}</span>
+        </div>
+        
+        {/* Controls */}
+        <div className="flex items-center justify-center space-x-4">
+          <button
+            onClick={() => jumpTime(-10)}
+            className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+            aria-label="Jump 10 seconds back"
+          >
+            <BackwardIcon className="h-5 w-5" />
+          </button>
+          
+          <button
+            onClick={togglePlay}
+            disabled={loading || error}
+            className={`p-3 rounded-full transition-colors ${
+              loading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-500 text-white hover:bg-emerald-600'
+            }`}
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {loading ? (
+              <div className="h-5 w-5 rounded-full border-2 border-gray-300 border-t-gray-500 animate-spin"></div>
+            ) : isPlaying ? (
+              <PauseIcon className="h-5 w-5" />
+            ) : (
+              <PlayIcon className="h-5 w-5" />
+            )}
+          </button>
+          
+          <button
+            onClick={() => jumpTime(10)}
+            className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+            aria-label="Jump 10 seconds forward"
+          >
+            <ForwardIcon className="h-5 w-5" />
+          </button>
+        </div>
+        
+        {/* Volume control */}
+        <div className="flex items-center justify-center mt-3">
+          <span className="text-xs text-gray-500 mr-2">Volume</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="w-32 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          />
+        </div>
+        
+        {/* Hidden audio element */}
+        <audio ref={audioRef} preload="auto" className="hidden" />
+        
+        {/* Error message */}
+        {error && (
+          <div className="mt-3 text-sm text-red-500 text-center">
+            {error}. Please try again or try a different audio source.
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+export default QuranAudioPlayer; 

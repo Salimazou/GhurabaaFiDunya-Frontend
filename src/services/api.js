@@ -1,5 +1,6 @@
 import axios from 'axios';
 import config from '../config';
+import { quranAPI } from './quranAPI';
 
 // Use API URL from configuration
 const API_URL = config.apiUrl;
@@ -105,4 +106,5 @@ export default {
   auth: authAPI,
   todos: todoAPI,
   mongo: mongoAPI,
+  quran: quranAPI
 }; 

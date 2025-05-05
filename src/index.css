@@ -70,3 +70,10 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Arabic font for Quran text */
+.font-arabic {
+  font-family: 'Scheherazade New', 'Traditional Arabic', serif;
+  line-height: 1.8;
+  font-size: 1.25rem;
+}
