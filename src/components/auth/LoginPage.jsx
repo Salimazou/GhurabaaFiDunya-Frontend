@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from './AuthContext';
@@ -62,21 +62,51 @@ const PrayerTimes = () => {
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, loading } = useAuth();
+  const [errorMessage, setErrorMessage] = useState('');
+  const { login, loading, error } = useAuth();
   const navigate = useNavigate();
   
   // Random quote selection on page load
   const randomQuote = islamicQuotes[Math.floor(Math.random() * islamicQuotes.length)];
 
+  // Check if user was redirected here due to an unauthorized request
+  useEffect(() => {
+    // Clear any error messages when component mounts
+    setErrorMessage('');
+    
+    // Clear any old tokens that might be invalid
+    const token = localStorage.getItem('token');
+    if (token) {
+      localStorage.removeItem('token');
+      setErrorMessage('Je sessie is verlopen. Log opnieuw in om verder te gaan.');
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Clear previous error message
+    setErrorMessage('');
+    
+    // Prevent submitting if already loading
+    if (loading) return;
+    
+    // Clear any potential token to ensure a fresh login attempt
+    localStorage.removeItem('token');
+    
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      // Use a local variable to track this login attempt's success
+      const loginSuccess = await login(email, password);
+      
+      // Only navigate if we got a successful response with a token
+      if (loginSuccess && loginSuccess.token) {
+        navigate('/dashboard');
+      }
     } catch (error) {
       // Error handling is done in the auth context
       console.error('Login failed:', error);
+      setErrorMessage(error.response?.data?.message || 'Inloggen mislukt. Controleer je gegevens en probeer het opnieuw.');
+      // No automatic redirect on error - user stays on login page
     }
   };
 
@@ -175,6 +205,13 @@ export default function LoginPage() {
                   </span>
                 ) : 'Inloggen'}
               </button>
+              
+              {/* Display error message if there is one */}
+              {errorMessage && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">{errorMessage}</p>
+                </div>
+              )}
             </form>
           </div>
         </motion.div>

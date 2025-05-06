@@ -19,7 +19,12 @@ const RECITERS = [
   { id: 'ar.abdullahawadaljuhani', name: 'Abdullah Juhany' },
   { id: 'ar.aymanswed', name: 'Ayman Suwaid' },
   { id: 'ar.yasseraldossari', name: 'Yasser al Dossari' },
-  { id: 'ar.jaberabdulhameed', name: 'Jaber Abdul Hameed' }
+  { id: 'ar.jaberabdulhameed', name: 'Jaber Abdul Hameed' },
+  { id: '58', name: 'Abdullah Albuajan' },
+  { id: '98', name: 'Abdullah Abdal' },
+  { id: '54', name: 'Abdulrahman Alsudaes' },
+  { id: '107', name: 'Mohammed Al-Lohaidan' },
+  { id: '137', name: 'Ahmad Talib bin Humaid' }
 ];
 
 const QuranAudioPlayer = ({ 
@@ -244,25 +249,25 @@ const QuranAudioPlayer = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-4 border border-gray-200"
+            className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-5 border border-emerald-100"
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex-1 mr-4">
-                <h3 className="font-medium text-gray-800">{surah.englishName}</h3>
-                <p className="text-sm text-gray-500">{surah.englishNameTranslation}</p>
+                <h3 className="font-medium text-emerald-800 text-lg">{surah.englishName}</h3>
+                <p className="text-sm text-slate-500">{surah.englishNameTranslation}</p>
               </div>
               
               <div className="flex items-center">
                 <button
                   onClick={toggleMinimized}
-                  className="p-1 mr-1 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-1.5 mr-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
                   aria-label="Minimize audio player"
                 >
                   <MinusIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={onClose}
-                  className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
                   aria-label="Close audio player"
                 >
                   <XMarkIcon className="h-5 w-5" />
@@ -271,12 +276,12 @@ const QuranAudioPlayer = ({
             </div>
             
             {/* Reciter selection */}
-            <div className="mb-3 flex items-center justify-center">
-              <SpeakerWaveIcon className="h-4 w-4 text-gray-500 mr-2" />
+            <div className="mb-5 flex items-center justify-center bg-slate-50 p-2 rounded-lg">
+              <SpeakerWaveIcon className="h-5 w-5 text-emerald-600 mr-2" />
               <select 
                 value={selectedReciter}
                 onChange={handleReciterChange}
-                className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded px-2 py-1 focus:ring-emerald-500 focus:border-emerald-500"
+                className="bg-white border border-slate-200 text-slate-700 text-sm rounded-md px-3 py-1.5 focus:ring-emerald-500 focus:border-emerald-500 shadow-sm"
                 disabled={loading}
               >
                 {RECITERS.map(reciter => (
@@ -289,25 +294,29 @@ const QuranAudioPlayer = ({
             
             {/* Progress bar */}
             <div 
-              className="h-2 bg-gray-200 rounded-full mb-3 relative cursor-pointer overflow-hidden"
+              className="h-2.5 bg-slate-200 rounded-full mb-4 relative cursor-pointer overflow-hidden hover:shadow-sm transition-shadow"
               onClick={handleProgressClick}
             >
               <div 
                 className="absolute inset-y-0 left-0 bg-emerald-500 rounded-full"
                 style={{ width: `${(currentTime / duration) * 100}%` }}
               ></div>
+              <div
+                className="absolute inset-y-0 bg-emerald-300 opacity-25 rounded-full"
+                style={{ width: `${(currentTime / duration) * 100 + 4}%`, maxWidth: '100%' }}
+              ></div>
             </div>
             
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-gray-500">{formatTime(currentTime)}</span>
-              <span className="text-xs text-gray-500">{formatTime(duration)}</span>
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-xs font-medium text-slate-500">{formatTime(currentTime)}</span>
+              <span className="text-xs font-medium text-slate-500">{formatTime(duration)}</span>
             </div>
             
             {/* Controls */}
-            <div className="flex items-center justify-center space-x-4">
+            <div className="flex items-center justify-center space-x-6 mb-6">
               <button
                 onClick={() => jumpTime(-10)}
-                className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
                 aria-label="Jump 10 seconds back"
               >
                 <BackwardIcon className="h-5 w-5" />
@@ -316,23 +325,23 @@ const QuranAudioPlayer = ({
               <button
                 onClick={togglePlay}
                 disabled={loading || error}
-                className={`p-3 rounded-full transition-colors ${
-                  loading ? 'bg-gray-200 text-gray-400' : 'bg-emerald-500 text-white hover:bg-emerald-600'
+                className={`p-4 rounded-full transition-all ${
+                  loading ? 'bg-slate-200 text-slate-400' : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-md hover:shadow-lg hover:scale-105'
                 }`}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {loading ? (
-                  <div className="h-5 w-5 rounded-full border-2 border-gray-300 border-t-gray-500 animate-spin"></div>
+                  <div className="h-6 w-6 rounded-full border-2 border-slate-300 border-t-slate-500 animate-spin"></div>
                 ) : isPlaying ? (
-                  <PauseIcon className="h-5 w-5" />
+                  <PauseIcon className="h-6 w-6" />
                 ) : (
-                  <PlayIcon className="h-5 w-5" />
+                  <PlayIcon className="h-6 w-6" />
                 )}
               </button>
               
               <button
                 onClick={() => jumpTime(10)}
-                className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
                 aria-label="Jump 10 seconds forward"
               >
                 <ForwardIcon className="h-5 w-5" />
@@ -340,8 +349,8 @@ const QuranAudioPlayer = ({
             </div>
             
             {/* Volume control */}
-            <div className="flex items-center justify-center mt-3">
-              <span className="text-xs text-gray-500 mr-2">Volume</span>
+            <div className="flex items-center justify-center mt-2 bg-slate-50 p-2 rounded-lg">
+              <SpeakerWaveIcon className="h-4 w-4 text-slate-500 mr-3" />
               <input
                 type="range"
                 min="0"
@@ -349,13 +358,13 @@ const QuranAudioPlayer = ({
                 step="0.01"
                 value={volume}
                 onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="w-32 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="w-36 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
               />
             </div>
             
             {/* Error message */}
             {error && (
-              <div className="mt-3 text-sm text-red-500 text-center">
+              <div className="mt-4 text-sm text-red-500 text-center bg-red-50 p-2 rounded-lg">
                 {error}. Please try again or try a different audio source.
               </div>
             )}

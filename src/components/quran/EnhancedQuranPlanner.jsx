@@ -8,7 +8,10 @@ import {
   XMarkIcon,
   ArrowPathIcon,
   AdjustmentsHorizontalIcon,
-  BookmarkIcon
+  BookmarkIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import quranAPI from '../../services/quranAPI';
@@ -23,7 +26,12 @@ const RECITERS = [
   { id: 'ar.abdullahawadaljuhani', name: 'Abdullah Juhany' },
   { id: 'ar.aymanswed', name: 'Ayman Suwaid' },
   { id: 'ar.yasseraldossari', name: 'Yasser al Dossari' },
-  { id: 'ar.jaberabdulhameed', name: 'Jaber Abdul Hameed' }
+  { id: 'ar.jaberabdulhameed', name: 'Jaber Abdul Hameed' },
+  { id: '58', name: 'Abdullah Albuajan' },
+  { id: '98', name: 'Abdullah Abdal' },
+  { id: '54', name: 'Abdulrahman Alsudaes' },
+  { id: '107', name: 'Mohammed Al-Lohaidan' },
+  { id: '137', name: 'Ahmad Talib bin Humaid' }
 ];
 
 // Helper to group surahs by juz (30 equal parts)
@@ -317,39 +325,45 @@ const EnhancedQuranPlanner = () => {
   const filteredJuzs = getFilteredJuzs();
   
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden relative">
-      <div className="bg-emerald-100 text-emerald-700 p-4 relative overflow-hidden">
-        <IslamicPattern />
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {/* Header with title and actions */}
+      <div className="bg-gradient-to-r from-emerald-100 to-emerald-50 px-5 py-4 border-b border-emerald-100">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold flex items-center">
-            <BookOpenIcon className="h-6 w-6 mr-2 text-emerald-600" />
+          <h2 className="text-lg md:text-xl font-bold text-emerald-800 flex items-center gap-2">
+            <BookOpenIcon className="h-6 w-6 text-emerald-600" />
             Koran Planner
           </h2>
           
           <div className="flex space-x-2">
-            <button
+            <motion.button
               onClick={() => setShowSearch(true)}
               className="p-1.5 rounded-full bg-white/80 text-emerald-700 hover:bg-white hover:text-emerald-600 transition shadow-sm"
               aria-label="Search Quran"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
-            </button>
+            </motion.button>
             
-            <button
+            <motion.button
               onClick={() => setShowReciterSelect(!showReciterSelect)}
               className="p-1.5 rounded-full bg-white/80 text-emerald-700 hover:bg-white hover:text-emerald-600 transition shadow-sm"
               aria-label="Select reciter"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <SpeakerWaveIcon className="h-5 w-5" />
-            </button>
+            </motion.button>
             
-            <button
+            <motion.button
               onClick={() => setShowFilters(!showFilters)}
               className="p-1.5 rounded-full bg-white/80 text-emerald-700 hover:bg-white hover:text-emerald-600 transition shadow-sm"
               aria-label="Filter surahs"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <AdjustmentsHorizontalIcon className="h-5 w-5" />
-            </button>
+            </motion.button>
           </div>
         </div>
         
@@ -484,24 +498,26 @@ const EnhancedQuranPlanner = () => {
               <div key={juz.juzNumber} className="border border-slate-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <button
                   onClick={() => toggleJuz(juz.juzNumber)}
-                  className="w-full px-4 py-3 flex justify-between items-center bg-slate-50 text-left"
+                  className="w-full px-4 py-3 flex justify-between items-center bg-white hover:bg-emerald-50 transition-colors duration-200 text-left"
                 >
                   <div className="flex items-center">
-                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium mr-2">
+                    <span className="inline-flex items-center justify-center h-7 w-7 rounded-full bg-emerald-100 text-emerald-700 text-xs font-medium mr-3">
                       {juz.juzNumber}
                     </span>
                     <span className="font-medium text-slate-700">Juz {juz.juzNumber}</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-slate-500">{juz.surahs.length} surahs</span>
-                    <span className="text-xs bg-slate-200 rounded-full h-5 w-5 flex items-center justify-center">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-xs bg-slate-100 text-slate-600 rounded-full px-2.5 py-1 font-medium">
+                      {juz.surahs.length} surahs
+                    </span>
+                    <span className="text-xs bg-slate-200 rounded-full h-6 w-6 flex items-center justify-center transform transition-transform duration-200 hover:scale-105">
                       {expandedJuz === juz.juzNumber ? '−' : '+'}
                     </span>
                   </div>
                 </button>
                 
                 {expandedJuz === juz.juzNumber && (
-                  <div className="p-3 bg-white">
+                  <div className="p-3 bg-white border-t border-slate-50">
                     <SurahGroup 
                       surahs={juz.surahs}
                       completedSurahs={completedSurahs}

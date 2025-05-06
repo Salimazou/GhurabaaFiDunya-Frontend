@@ -9,7 +9,9 @@ import {
   ArrowRightStartOnRectangleIcon,
   XMarkIcon,
   Bars3Icon,
-  BookOpenIcon
+  BookOpenIcon,
+  BookmarkIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 
 // Islamic arabesque pattern for sidebar header with softer colors
@@ -62,7 +64,8 @@ export default function Sidebar({ user, onLogout, onNavigate }) {
     { name: 'Koran', icon: BookOpenIcon, active: activeItem === 'Koran' },
     { name: 'Agenda', icon: CalendarIcon, active: activeItem === 'Agenda' },
     { name: 'Profiel', icon: UserIcon, active: activeItem === 'Profiel' },
-    { name: 'Instellingen', icon: Cog6ToothIcon, active: activeItem === 'Instellingen' }
+    { name: 'Instellingen', icon: Cog6ToothIcon, active: activeItem === 'Instellingen' },
+    { name: 'Memorisatie', icon: BookmarkIcon, active: activeItem === 'Memorisatie' },
   ];
 
   const currentDate = new Date();
@@ -183,15 +186,15 @@ export default function Sidebar({ user, onLogout, onNavigate }) {
               <li key={item.name}>
                 <button
                   onClick={() => handleNavItemClick(item.name)}
-                  className={`flex w-full items-center p-2 md:p-3 rounded-lg text-sm font-medium transition-all hover:scale-105
+                  className={`flex w-full items-center p-2 md:p-3 rounded-lg text-sm font-medium transition-all
                     ${
                       item.active
-                        ? 'bg-emerald-100 text-emerald-700'
+                        ? 'border-l-4 border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold shadow-sm pl-2'
                         : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 active:bg-emerald-100'
                     }`}
                   aria-current={item.active ? 'page' : undefined}
                 >
-                  <item.icon className={`h-5 w-5 mr-3 flex-shrink-0 ${item.active ? 'text-emerald-600' : ''}`} />
+                  <item.icon className={`h-6 w-6 mr-3 flex-shrink-0 ${item.active ? 'text-emerald-600' : 'text-slate-500'}`} />
                   {item.name}
                 </button>
               </li>

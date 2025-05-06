@@ -8,6 +8,9 @@ import Sidebar from './Sidebar';
 import QuranPlanner from './QuranPlanner';
 import EnhancedTodoList from './EnhancedTodoList';
 import QuranContent from '../quran/QuranContent';
+import MemorizationDashboard from '../quran/MemorizationDashboard';
+import AgendaApp from '../agenda/AgendaApp';
+import { QuranMemorizationProvider } from '../../context/QuranMemorizationContext';
 
 // Subtle Islamic pattern background with lower opacity
 const subtleIslamicPattern = {
@@ -199,6 +202,11 @@ export default function Dashboard() {
                 <div className="xl:col-span-2 space-y-6">
                   {activeContent === 'Dashboard' && (
                     <>
+                      {/* Quran Memorization Dashboard */}
+                      <section>
+                        <MemorizationDashboard />
+                      </section>
+                      
                       {/* Quran Planner */}
                       <section>
                         <QuranPlanner />
@@ -230,14 +238,28 @@ export default function Dashboard() {
                     <QuranContent />
                   )}
                   
-                  {/* Add other content views here for Taken, Agenda, etc. */}
+                  {activeContent === 'Memorisatie' && (
+                    <section>
+                      <MemorizationDashboard />
+                    </section>
+                  )}
+                  
+                  {activeContent === 'Agenda' && (
+                    <section>
+                      <QuranMemorizationProvider>
+                        <AgendaApp />
+                      </QuranMemorizationProvider>
+                    </section>
+                  )}
+                  
+                  {/* Add other content views here for Taken, etc. */}
                 </div>
                 
                 {/* Right sidebar */}
-                <div className="space-y-6">
+                <div className="bg-white shadow-sm rounded-xl p-4 h-fit space-y-6 border-l border-slate-100">
                   {/* Islamic prayer times */}
-                  <section className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div className="bg-emerald-100 text-emerald-700 p-4">
+                  <section className="overflow-hidden">
+                    <div className="bg-emerald-100 text-emerald-700 p-4 rounded-lg">
                       <h2 className="text-lg font-bold flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
@@ -285,8 +307,8 @@ export default function Dashboard() {
                   </section>
                   
                   {/* Islamic quote of the day */}
-                  <section className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div className="bg-amber-100 text-amber-700 p-4">
+                  <section className="overflow-hidden">
+                    <div className="bg-amber-100 text-amber-700 p-4 rounded-lg">
                       <h2 className="text-lg font-bold flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -316,8 +338,8 @@ export default function Dashboard() {
                   </section>
                   
                   {/* Islamic calendar */}
-                  <section className="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <div className="bg-slate-100 text-slate-700 p-4">
+                  <section className="overflow-hidden">
+                    <div className="bg-slate-100 text-slate-700 p-4 rounded-lg">
                       <h2 className="text-lg font-bold flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -327,21 +349,41 @@ export default function Dashboard() {
                     </div>
                     <div className="p-4 relative">
                       {/* Decorative crescent moon */}
-                      <div className="absolute top-4 right-4 w-12 h-12 text-slate-100 opacity-50">
+                      <motion.div 
+                        className="absolute top-4 right-4 w-12 h-12 text-slate-100 opacity-50"
+                        animate={{ 
+                          rotate: [0, 5, 0, -5, 0],
+                          opacity: [0.4, 0.5, 0.4] 
+                        }}
+                        transition={{ 
+                          duration: 8, 
+                          repeat: Infinity,
+                          ease: "easeInOut" 
+                        }}
+                      >
                         <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9a9 9 0 0 1 0-18zm0 2a7 7 0 0 0 0 14 7 7 0 0 0 0-14z"/>
                         </svg>
-                      </div>
+                      </motion.div>
                       
                       <div className="text-center pt-2 pb-4">
-                        <p className="text-2xl font-bold text-slate-700">12 Ramadan</p>
-                        <p className="text-slate-500">1445 AH</p>
+                        <motion.div 
+                          initial={{ scale: 0.95 }}
+                          animate={{ scale: 1 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <p className="text-2xl font-bold text-emerald-800">12 Ramadan</p>
+                          <p className="text-slate-500">1445 AH</p>
+                        </motion.div>
                       </div>
                       
-                      <div className="mt-3 bg-slate-50 p-3 rounded-lg border border-slate-100 text-center">
-                        <p className="text-sm text-slate-600">
-                          <span className="font-medium text-amber-600">18</span> dagen tot Eid al-Fitr
-                        </p>
+                      <div className="mt-4 text-center">
+                        <span className="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full text-sm font-medium inline-flex items-center shadow-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                          </svg>
+                          18 dagen tot Eid al-Fitr
+                        </span>
                       </div>
                     </div>
                   </section>
